@@ -144,9 +144,16 @@ section{position:relative}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 /* model-viewer */
 .mv{width:100%;height:420px;background:transparent;border-radius:0;--poster-color:transparent;filter:drop-shadow(0 32px 48px rgba(59,31,10,.22)) drop-shadow(0 8px 16px rgba(59,31,10,.14))}
-.ar-btn{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:var(--dark);color:var(--gold);font-weight:800;font-size:.82rem;padding:11px 20px;border-radius:100px;border:none;cursor:pointer;display:flex;gap:8px;align-items:center;box-shadow:0 8px 22px -8px rgba(0,0,0,.5);z-index:5}
-.ar-btn:hover{background:#000}
-.ar-btn-hero{bottom:auto;left:14px;top:14px;transform:none;font-size:.74rem;padding:9px 15px}
+.ar-btn{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:var(--dark);color:var(--gold);font-weight:800;font-size:.82rem;padding:11px 20px;border-radius:100px;border:none;cursor:pointer;display:flex;gap:8px;align-items:center;box-shadow:0 8px 22px -8px rgba(0,0,0,.5);z-index:5;transition:transform .15s,box-shadow .15s}
+.ar-btn:hover{background:#000;transform:translateX(-50%) scale(1.06);box-shadow:0 12px 28px -8px rgba(0,0,0,.6)}
+.ar-btn-hero{bottom:auto;left:14px;top:14px;transform:none;font-size:.74rem;padding:9px 15px;background:var(--accent);color:#fff}
+.ar-btn-hero:hover{transform:scale(1.06);background:var(--dark)}
+@keyframes ar-pulse{0%,100%{box-shadow:0 0 0 0 rgba(205,133,63,.6)}60%{box-shadow:0 0 0 12px rgba(205,133,63,0)}}
+.ar-btn-hero.pulse{animation:ar-pulse 1.6s ease-out infinite}
+/* Banner de instrução AR (visível quando vem de QR) */
+#arHint{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(20,12,5,.92);color:#fff;font-size:.82rem;font-weight:700;padding:13px 20px 13px 16px;border-radius:100px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:9999;backdrop-filter:blur(8px);max-width:90vw;opacity:0;transition:opacity .4s;pointer-events:none}
+#arHint.show{opacity:1;pointer-events:auto}
+#arHint .hint-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer;padding:0 0 0 4px;line-height:1}
 .qr-card{position:absolute;bottom:-30px;right:-26px;background:var(--light);border-radius:16px;padding:14px;box-shadow:var(--shadow-lg);border:1px solid rgba(123,74,30,.1);text-align:center;width:140px;animation:bob 5s ease-in-out infinite .4s}
 .qr-card img{width:100px;height:100px;margin:0 auto 8px;border-radius:8px}
 .qr-card small{font-size:.7rem;font-weight:700;color:var(--accent);line-height:1.3;display:block}
@@ -445,16 +452,18 @@ section{position:relative}
         ar-modes="webxr scene-viewer quick-look"
         ar-scale="auto"
         ar-placement="floor"
+        xr-environment
         camera-controls
         camera-orbit="0deg 75deg 100%"
         min-camera-orbit="auto 0deg auto"
         max-camera-orbit="auto 90deg auto"
-        shadow-intensity="1.2"
+        shadow-intensity="1.5"
+        shadow-softness="1"
         exposure="1.2"
         touch-action="pan-y">
         <div slot="progress-bar"></div>
         <div slot="poster" style="display:grid;place-items:center;height:100%;font-weight:700;color:var(--accent)">A carregar prato 3D…</div>
-        <button slot="ar-button" class="ar-btn ar-btn-hero">Ver na minha mesa</button>
+        <button slot="ar-button" class="ar-btn ar-btn-hero" id="arBtnHero">📷 Ver na minha mesa</button>
       </model-viewer>
       <div class="float-card fc1"><span class="dot">✓</span><div>Pedido confirmado<br><small style="font-weight:600;color:var(--muted)">Mesa 7 · Bife com Batatas</small></div></div>
       <div class="qr-card">
@@ -904,9 +913,48 @@ document.querySelectorAll('#dishPicker .dchip').forEach(chip=>{
 // Botão "Ver em AR" externo dispara o AR do model-viewer
 const arTrigger=document.getElementById('arTrigger');
 if(arTrigger)arTrigger.onclick=()=>{
-  if(demoModel.canActivateAR){demoModel.activateAR();}
+  if(demoModel&&demoModel.canActivateAR){demoModel.activateAR();}
   else{alert('Abra esta página no seu telemóvel (iOS ou Android) e toque em "Ver em AR" — ou escaneie o QR Code abaixo.');}
 };
+
+// Quando vem do QR code (#hero-ar): guia o utilizador para o AR
+(function initQrAR(){
+  const arBtn=document.getElementById('arBtnHero');
+  if(!arBtn)return;
+
+  function showARHint(){
+    let hint=document.getElementById('arHint');
+    if(!hint){
+      hint=document.createElement('div');
+      hint.id='arHint';
+      hint.innerHTML='📷 Aponte a câmara para a mesa e toque em <strong style="color:var(--gold);margin:0 4px">Ver na minha mesa</strong> <button class="hint-close" aria-label="fechar">✕</button>';
+      document.body.appendChild(hint);
+      hint.querySelector('.hint-close').onclick=()=>hint.classList.remove('show');
+    }
+    requestAnimationFrame(()=>hint.classList.add('show'));
+    setTimeout(()=>hint.classList.remove('show'),7000);
+  }
+
+  function onQrArrival(){
+    if(location.hash!=='#hero-ar')return;
+    // Faz scroll suave para o modelo
+    const mv=document.getElementById('heroModel');
+    if(mv)mv.scrollIntoView({behavior:'smooth',block:'center'});
+    // Pulsa o botão AR para chamar atenção
+    arBtn.classList.add('pulse');
+    setTimeout(()=>arBtn.classList.remove('pulse'),8000);
+    // Mostra instrução
+    showARHint();
+  }
+
+  // Corre ao carregar e quando o hash muda
+  window.addEventListener('hashchange',onQrArrival);
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',onQrArrival);
+  }else{
+    onQrArrival();
+  }
+}());
 
 // Form
 document.getElementById('demoForm').addEventListener('submit',e=>{
