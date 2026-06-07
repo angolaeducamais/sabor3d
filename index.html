@@ -452,12 +452,11 @@ section{position:relative}
             auto-rotate
             auto-rotate-delay="0"
             rotation-per-second="22deg"
-            camera-orbit="0deg 42deg 90%"
-            min-camera-orbit="auto 42deg auto"
-            max-camera-orbit="auto 42deg auto"
+            camera-orbit="0deg 75deg 100%"
+            min-camera-orbit="auto 75deg 100%"
+            max-camera-orbit="auto 75deg 100%"
             shadow-intensity="1.2"
-            exposure="1.1"
-            touch-action="pan-y">
+            exposure="1.1">
             <div slot="progress-bar"></div>
             <div slot="poster" style="display:grid;place-items:center;height:100%;font-weight:700;color:var(--accent)">A carregar prato 3D…</div>
             <button slot="ar-button" class="ar-btn ar-btn-hero">Ver na minha mesa</button>
@@ -840,7 +839,7 @@ counters.forEach(c=>cio.observe(c));
 const DISHES=[
   {name:'Hambúrguer Artesanal',price:'3.500 Kz',desc:'Pão brioche, carne grelhada, queijo cheddar e alface fresca. Gire em 3D e toque em "Ver em AR" para o colocar na sua mesa em tamanho real.',
    src:FOOD.burger,
-   orbit:'0deg 42deg 90%',
+   orbit:'0deg 75deg 100%',
    nutri:{kcal:680,prot:38,carb:45,fat:36},
    ingr:[['Pão brioche',180],['Carne bovina',290],['Queijo cheddar',110],['Alface',5],['Tomate',15],['Molho da casa',80]]},
   {name:'Refrigerante Gelado',price:'800 Kz',desc:'Bebidas ilimitadas incluídas em todos os planos. O seu cliente vê exatamente o que vai pedir, em 3D.',
@@ -869,7 +868,7 @@ function renderDish(d){
 // Carregar modelos embutidos (data-URI) — não dependem de servidor externo
 const heroModel=document.getElementById('heroModel');
 const demoModel=document.getElementById('demoModel');
-if(heroModel){heroModel.src=FOOD.burger;heroModel.setAttribute('camera-orbit','0deg 42deg 90%');}
+if(heroModel){heroModel.src=FOOD.burger;heroModel.setAttribute('camera-orbit','0deg 75deg 100%');}
 if(demoModel){demoModel.src=DISHES[0].src;demoModel.setAttribute('camera-orbit',DISHES[0].orbit);renderDish(DISHES[0]);}
 
 function makeQR(elId,text){
