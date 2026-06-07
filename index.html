@@ -143,7 +143,7 @@ section{position:relative}
 .fc2 .dot{background:rgba(245,168,0,.2);color:var(--accent)}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 /* model-viewer */
-.mv{width:100%;height:330px;background:radial-gradient(circle at 50% 35%,#fff6e0,#fbedd0);border-radius:0 0 18px 18px;--poster-color:transparent}
+.mv{width:100%;height:330px;background:radial-gradient(ellipse at 50% 80%,#fff0cc 0%,#f5e3be 55%,#ecdcb0 100%);border-radius:0 0 18px 18px;--poster-color:transparent}
 .ar-btn{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:var(--dark);color:var(--gold);font-weight:800;font-size:.82rem;padding:11px 20px;border-radius:100px;border:none;cursor:pointer;display:flex;gap:8px;align-items:center;box-shadow:0 8px 22px -8px rgba(0,0,0,.5);z-index:5}
 .ar-btn:hover{background:#000}
 .ar-btn-hero{bottom:auto;left:14px;top:14px;transform:none;font-size:.74rem;padding:9px 15px}
@@ -451,8 +451,11 @@ section{position:relative}
             auto-rotate
             auto-rotate-delay="0"
             rotation-per-second="28deg"
-            camera-orbit="0deg 75deg 105%"
-            shadow-intensity="1"
+            camera-orbit="25deg 70deg 105%"
+            min-camera-orbit="auto 70deg auto"
+            max-camera-orbit="auto 70deg auto"
+            shadow-intensity="2.5"
+            shadow-softness="0.8"
             exposure="1.2"
             touch-action="pan-y">
             <div slot="progress-bar"></div>
@@ -866,7 +869,12 @@ function renderDish(d){
 // Carregar modelos embutidos (data-URI) — não dependem de servidor externo
 const heroModel=document.getElementById('heroModel');
 const demoModel=document.getElementById('demoModel');
-if(heroModel){heroModel.src=FOOD.burger;heroModel.setAttribute('camera-orbit','25deg 70deg 100%');}
+if(heroModel){
+  heroModel.src=FOOD.burger;
+  heroModel.addEventListener('load',()=>{
+    heroModel.setAttribute('camera-orbit','25deg 70deg 105%');
+  },{once:true});
+}
 if(demoModel){demoModel.src=DISHES[0].src;demoModel.setAttribute('camera-orbit',DISHES[0].orbit);renderDish(DISHES[0]);}
 
 function makeQR(elId,text){
